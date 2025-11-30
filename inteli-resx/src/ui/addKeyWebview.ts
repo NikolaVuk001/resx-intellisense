@@ -118,14 +118,18 @@ export function getWebviewContent(
             if (message.command === "fill-translations") {
                 const translations = message.data;
 
-                const inputs = document.querySelectorAll("input");
-                // FIXED: inputs.forEach instead of input.forEach
+                const inputs = document.querySelectorAll("input");                
                 inputs.forEach((input) => {
                 // <--- WAS WRONG HERE
                 const langCode = input.id;
                 if (translations[langCode] && input.value.trim() === "") {
                     input.value = translations[langCode];
                 }
+                // THIS IS ONLY FOR ME:
+                if (langCode === 'Default' && translations['en']) {
+                    input.value = translations['en'];
+                }
+
                 });
             }
             });
@@ -140,8 +144,14 @@ export function getWebviewContent(
 
             // Allow pressing "Enter" to save
             window.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") {
+            if (e.key === "Enter" && !e.ctrlKey) {
                 document.getElementById("saveBtn").click();
+            }
+            if(e.ctrlKey && e.key === "Enter"){
+                const aiBtn = document.getElementById("aiBtn");
+                if(aiBtn){
+                aiBtn.click();
+                }
             }
             });
 

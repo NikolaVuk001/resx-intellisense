@@ -67,6 +67,12 @@ window.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
     document.getElementById("saveBtn").click();
   }
+  if(e.ctrlKey && e.key === "Enter"){
+    const aiBtn = document.getElementById("aiBtn");
+    if(aiBtn){
+      aiBtn.click();
+    }
+  }
 });
 
 window.addEventListener("message", (event) => {
