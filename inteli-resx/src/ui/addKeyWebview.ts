@@ -2,19 +2,30 @@ import * as vscode from "vscode";
 
 export function getWebviewContent(
   keyName: string,
-  fileGroups: { path: string; label: string; value: string }[]
+  fileGroups: { path: string; label: string; value: string }[],
+  hasAi: boolean
 ) {
   // Generate an input field for every file found
   const inputsHtml = fileGroups
     .map(
-      (file) => `
+      (file, index) => `
         <div class="input-group">
-            <label>${file.label}</label>
-            <input type="text" id="${file.path}" value="${file.value}" placeholder="Translation for ${file.label}" />
+            <label>${file.label.toUpperCase()}</label>
+            <input 
+                type="text" 
+                id="${file.label}" 
+                data-path="${file.path}" 
+                placeholder="Translation for ${file.label}" 
+                ${index === 0 ? 'class="primary-input"' : ""} 
+            />
         </div>
     `
     )
     .join("");
+    
+  const aiButtonHtml = hasAi
+    ? `<button id="aiBtn" style="background-color: var(--vscode-button-secondaryBackground); color: var(--vscode-button-secondaryForeground); margin-right: 10px;">✨ AI Fill</button>`
+    : "";
 
   return `<!DOCTYPE html>
     <html lang="en">
@@ -60,38 +71,79 @@ export function getWebviewContent(
             ${inputsHtml}
         </div>
 
-        <button id="saveBtn">Save All</button>
-
+        <div style="margin-top: 20px;">
+            ${aiButtonHtml}
+            <button id="saveBtn">Save All</button>    
+        </div>  
+        
         <script>
+
             const vscode = acquireVsCodeApi();
 
-            // 1. Save Logic
-            document.getElementById('saveBtn').addEventListener('click', () => {
-                const data = {};
-                const inputs = document.querySelectorAll('input');
-                inputs.forEach(input => {
-                    data[input.id] = input.value;
-                });
-
-                vscode.postMessage({ command: 'save', data: data });
+            // 1. Save Logic (Updated to use data-path)
+            document.getElementById("saveBtn").addEventListener("click", () => {
+            const data = {};
+            const inputs = document.querySelectorAll("input");
+            inputs.forEach((input) => {
+                // Use the file path stored in data-path attribute
+                const filePath = input.getAttribute("data-path");
+                if (input.value.trim() !== "") {
+                data[filePath] = input.value;
+                }
+            });
+            vscode.postMessage({ command: "save", data: data });
             });
 
+            // 2. AI Logic
+            const aiBtn  = document.getElementById("aiBtn");
+            if (aiBtn) {
+                aiBtn.addEventListener('click', () => {
+                    // Get text from the first input (the primary one)
+                    const primaryInput = document.querySelector(".primary-input");
+                    const text = primaryInput.value;
+                    console.log("AI Generation requested for text:", text);
+                    if(!text) return;
+
+                    vscode.postMessage({
+                        command: 'generate-ai',
+                        sourceText: text.trim()
+                    });
+                });
+            }
+
+            // 3. Listen for AI Results comming back
+            window.addEventListener("message", (event) => {
+            const message = event.data;
+
+            if (message.command === "fill-translations") {
+                const translations = message.data;
+
+                const inputs = document.querySelectorAll("input");
+                // FIXED: inputs.forEach instead of input.forEach
+                inputs.forEach((input) => {
+                // <--- WAS WRONG HERE
+                const langCode = input.id;
+                if (translations[langCode] && input.value.trim() === "") {
+                    input.value = translations[langCode];
+                }
+                });
+            }
+            });
 
             // 2. Auto-Focus the first input field
             // Since we sorted the list so "Default" is frist, this puts the cursor
             // exactly where you want it.
-            const firstinput = document.querySelector('input');
-            if(firstinput) {
-                firstinput.focus();
+            const firstInput = document.querySelector("input");
+            if (firstInput) {
+                firstInput.focus();
             }
 
-
             // Allow pressing "Enter" to save
-            window.addEventListener('keydown', (e) => {
-                if(e.key === 'Enter') {
-                    document.getElementById('saveBtn').click();
-                }
-            })
+            window.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                document.getElementById("saveBtn").click();
+            }
+            });
 
         </script>
     </body>

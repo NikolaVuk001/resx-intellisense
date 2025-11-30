@@ -4,7 +4,7 @@
   "description": "an resx intelisense for C# and Blazor",
   "version": "0.0.1",
   "engines": {
-    "vscode": "^1.106.1"
+    "vscode": "^1.90.0"
   },
   "categories": [
     "Other"
@@ -21,9 +21,23 @@
         "command": "inteli-resx.helloWorld",
         "title": "Hello World"
       }
-    ]
-  },  
-
+    ],
+    "configuration": {
+      "title": " ResX IntelliSense",
+      "properties": {
+        "resxIntellisense.defaultFile": {
+          "type": "string",
+          "default": "SharedResources.resx",
+          "description": "The default .resx file name to target (e.g. Resources.resx)."
+        },
+        "resxIntellisense.primaryLanguage": {
+          "type": "string",
+          "default": "sr-Latn-RS",
+          "description": "The ISO code (e.g. 'en', 'fr') of the language to show first in the Add Key form."
+        }
+      }
+    }
+  },
   "scripts": {
     "vscode:prepublish": "npm run package",
     "compile": "npm run check-types && npm run lint && node esbuild.js",
@@ -52,16 +66,5 @@
   },
   "dependencies": {
     "fast-xml-parser": "^5.3.2"
-  },
-  "configuration": {
-      "title": " ResX IntelliSense",
-      "properties": {
-        "resxIntellisense.defaultFile": {
-          "type": "string",
-          "default": "Resources.resx",
-          "description": "The default .resx file name to target (e.g. Resources.resx)."
-        }
-      }
-    }
-    
+  }
 }
