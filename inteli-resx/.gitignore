@@ -1,0 +1,50 @@
+# Node modules
+node_modules/
+
+# Build output
+dist/
+out/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# VS Code settings
+.vscode/
+
+# Coverage reports
+coverage/
+
+# ESBuild cache
+.esbuild/
+
+# Dependency directories
+jspm_packages/
+
+# Misc
+.DS_Store
+*.log
+
+# Test output
+*.test.js
+*.test.ts
+TestC#/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Package lock files (optional, if you don't want to track them)
+# package-lock.json
+# yarn.lock
+
+# Mac system files
+Thumbs.db
+
+# VS Code extension packaging
+*.vsix
