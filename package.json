@@ -34,6 +34,14 @@
           "type": "string",
           "default": "sr-Latn-RS",
           "description": "The ISO code (e.g. 'en', 'fr') of the language to show first in the Add Key form."
+        },
+        "resxIntellisense.excludedLanguages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "List of language codes to hide from the Add/Edit form (e.g. ['sqAL', 'de'])."
         }
       }
     }

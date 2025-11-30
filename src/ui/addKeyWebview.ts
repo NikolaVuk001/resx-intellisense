@@ -2,27 +2,29 @@ import * as vscode from "vscode";
 
 export function getWebviewContent(
   keyName: string,
-  fileGroups: { path: string; label: string; value: string }[],
+  fileGroups: { path: string; label: string; value: string, isDisabled: boolean }[],
   hasAi: boolean
 ) {
   // Generate an input field for every file found
   const inputsHtml = fileGroups
     .map(
       (file, index) => `
-        <div class="input-group">
-            <label>${file.label.toUpperCase()}</label>
-            <input 
-                type="text" 
-                id="${file.label}" 
-                data-path="${file.path}" 
-                placeholder="Translation for ${file.label}" 
-                ${index === 0 ? 'class="primary-input"' : ""} 
-            />
-        </div>
-    `
+    <div class="input-group">
+        <label>${file.label.toUpperCase()}</label>
+        <input 
+            type="text" 
+            id="${file.label}" 
+            data-path="${file.path}" 
+            value="${file.value}"             
+            ${file.isDisabled ? 'disabled' : ''}
+            placeholder="Translation for ${file.label}" 
+            ${index === 0 ? 'class="primary-input"' : ""} 
+        />
+    </div>
+`
     )
     .join("");
-    
+
   const aiButtonHtml = hasAi
     ? `<button id="aiBtn" style="background-color: var(--vscode-button-secondaryBackground); color: var(--vscode-button-secondaryForeground); margin-right: 10px;">✨ AI Fill</button>`
     : "";
@@ -99,7 +101,7 @@ export function getWebviewContent(
             if (aiBtn) {
                 aiBtn.addEventListener('click', () => {
                     // Get text from the first input (the primary one)
-                    const primaryInput = document.querySelector(".primary-input");
+                    const primaryInput = document.querySelector(".primary-input:not([disabled])");
                     const text = primaryInput.value;
                     console.log("AI Generation requested for text:", text);
                     if(!text) return;

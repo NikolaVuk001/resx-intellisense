@@ -1,42 +1,64 @@
-import * as vscode from 'vscode';
-import { ResxService } from '../services/resxService';
+import * as vscode from "vscode";
+import { ResxService } from "../services/resxService";
 
 export class ResxCodeActionProvider implements vscode.CodeActionProvider {
-    constructor(private resxService: ResxService) { }
+  constructor(private resxService: ResxService) {}
 
+  provideCodeActions(
+    document: vscode.TextDocument,
+    range: vscode.Range | vscode.Selection,
+    context: vscode.CodeActionContext,
+    token: vscode.CancellationToken
+  ): vscode.ProviderResult<(vscode.CodeAction | vscode.Command)[]> {
+    const lineText = document.lineAt(range.start.line).text;
 
+    // REGEX: Extract the key inside Localizer["KEY"]
+    const regex =
+      /(Localizer|StringLocalizer|GetString)\s*\[\s*"([^"]+)"\s*\]/i;
+    const match = lineText.match(regex);
 
-    provideCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection, context: vscode.CodeActionContext, token: vscode.CancellationToken): vscode.ProviderResult<(vscode.CodeAction | vscode.Command)[]> {
-        const lineText = document.lineAt(range.start.line).text;
+    if (!match) return;
 
-        // REGEX: Extract the key inside Localizer["KEY"]
-        const regex = /(Localizer|StringLocalizer|GetString)\s*\[\s*"([^"]+)"\s*\]/i;
-        const match = lineText.match(regex);
+    const keyName = match[2];
+    const keyExists = this.resxService.getKeyExsists(keyName);
 
-        if(!match) return;
+    const actions: vscode.CodeAction[] = [];
 
+    if (!keyExists) {
+      // Logic 1: Missing Key -> "Add Key" Quick Fix
+      // Create the Quick fix
+      const action = new vscode.CodeAction(
+        `Add key "${keyName}" to .resx`,
+        vscode.CodeActionKind.QuickFix
+      );
 
-        const keyName = match[2];
+      action.command = {
+        command: "resx-intelisense.addKey",
+        title: "Add to Resx",
+        arguments: [keyName],
+      };
 
-        // Ask the service: Does this key exist in the resx files?
-        if(this.resxService.getKeyExsists(keyName)) return;
-
-
-        // Create the Quick fix
-        const action = new vscode.CodeAction(`Add key "${keyName}" to .resx`, vscode.CodeActionKind.QuickFix);
-        
-        action.command = {
-            command: 'resx-intelisense.addKey',
-            title: 'Add to Resx',
-            arguments: [keyName]
-        }
-
-        return [action];
-
+      actions.push(action);
+    } else {
+      // Logic 2: Key Exists -> "Edit Key" Quick Fix
+      const editAction = new vscode.CodeAction(
+        `Edit ${keyName} tranlations`,
+        vscode.CodeActionKind.Refactor
+      );
+      editAction.command = {
+        command: "resx-intelisense.addKey", // We reuse the same command!
+        title: "Edit ResX",
+        arguments: [keyName],
+      };
+      actions.push(editAction);
     }
-    resolveCodeAction?(codeAction: vscode.CodeAction, token: vscode.CancellationToken): vscode.ProviderResult<vscode.CodeAction> {
-        throw new Error('Method not implemented.');
-    }
 
-
+    return actions;
+  }
+  resolveCodeAction?(
+    codeAction: vscode.CodeAction,
+    token: vscode.CancellationToken
+  ): vscode.ProviderResult<vscode.CodeAction> {
+    throw new Error("Method not implemented.");
+  }
 }
