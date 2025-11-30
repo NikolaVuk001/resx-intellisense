@@ -1,9 +1,7 @@
 import * as vscode from "vscode";
 
-export class AiService {
-  // Check if we have access to a model
-  public async isAiAvailable(): Promise<boolean> {
-    // Look for chat models (Copilot usaully registers as 'gpt-4' or similar families)
+export class AiService {  
+  public async isAiAvailable(): Promise<boolean> {    
     const models = await vscode.lm.selectChatModels({ family: "gpt-4" });
     return models.length > 0;
   }
@@ -13,16 +11,13 @@ export class AiService {
     sourceLang: string,
     sourceText: string,
     targetLangs: string[]
-  ): Promise<{ [lang: string]: string }> {
-    // 1. Get the model
+  ): Promise<{ [lang: string]: string }> {    
     const models = await vscode.lm.selectChatModels({ family: "gpt-4" });
     console.log("Available models for translation:", models);
     if (models.length === 0) return {};
 
     const model = models[0];
-
-    // 2. Construct the prompt
-    // We ask for JSON output it's easy to parse
+    
     const prompt = `
         You are a localization expert.
         Key: ${keyName}
@@ -51,10 +46,7 @@ export class AiService {
       let fullText = "";
       for await (const framgent of response.text) {
         fullText += framgent;
-      }
-
-      // 5. Parse JSON
-      // AI sometimes wraps code in \`\`\`json ... \`\`\`, strip that if needed
+      }      
 
       const cleanJson = fullText.replace(/```json|```/g, "").trim();
       return JSON.parse(cleanJson);

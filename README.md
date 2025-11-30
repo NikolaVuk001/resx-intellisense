@@ -1,71 +1,53 @@
-# inteli-resx README
+# Inteli-Resx
 
-This is the README for your extension "inteli-resx". After writing up a brief description, we recommend including the following sections.
+A VS Code extension for managing `.resx` localization files directly from C# and Razor code. 
+
+It provides IntelliSense for `IStringLocalizer`, detects missing keys, and includes a UI for adding or editing translations across multiple resource files simultaneously.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+### 1. IntelliSense & Autocomplete
+Auto-completes key names when using `IStringLocalizer`, `StringLocalizer`, or `.GetString()`.
+* Triggers on `"` or `[` inside `.cs` and `.razor` files.
+* Reads keys from your configured default `.resx` file.
 
-For example if there is an image subfolder under your extension project workspace:
+### 2. Missing Key Detection
+* Scans your code for keys that do not exist in the resource file.
+* Marks missing keys with a **warning squiggle**.
 
-\!\[feature X\]\(images/feature-x.png\)
+### 3. Add & Edit Keys (Quick Fix)
+Use `Ctrl + .` (Quick Fix) on any key string:
+* **Add Key:** If the key is missing, opens a form to add it to your resource files.
+* **Edit Key:** If the key exists, opens the form to update existing translations.
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+### 4. Resource Families & Grouping
+The extension groups related files automatically.
+* *Example:* If your target is `SharedResources.resx`, it automatically finds `SharedResources.fr.resx`, `SharedResources.es.resx`, etc.
+* The "Add/Edit" form displays input fields for all found files in the family so you can translate everything in one go.
 
-## Requirements
-
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
-
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
+### 5. AI Translation Helper
+* If you have **GitHub Copilot** (or a compatible Chat Model) installed, an **"AI Fill"** button appears in the form.
+* It takes your primary language input and generates translations for the other fields automatically.
 
 ---
 
-## Following extension guidelines
+## Configuration
 
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
+Add these settings to your `.vscode/settings.json`:
 
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
+| Setting | Default | Description |
+| :--- | :--- | :--- |
+| `resxIntellisense.defaultFile` | `Resources.resx` | The main resource file to target. The extension will automatically find localized variants (e.g., setting `Shared.resx` will also find `Shared.fr.resx`). |
+| `resxIntellisense.primaryLanguage` | `en` | The language code to sort to the top of the Add/Edit form (e.g., `en` or `sr-Latn-RS`). |
+| `resxIntellisense.excludedLanguages` | `[]` | List of language codes to hide from the form (e.g., `["sqAL"]`). |
+| `resxIntellisense.singleFileMode` | `false` | If `true`, ignores localized files and only writes to the exact `defaultFile`. Disables AI features. |
 
-## Working with Markdown
+### Recommended Settings for Razor
+VS Code disables string suggestions in Razor by default. To make the IntelliSense pop up automatically inside quotes, add this:
 
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+```json
+"[razor]": {
+    "editor.quickSuggestions": {
+        "strings": true
+    }
+}

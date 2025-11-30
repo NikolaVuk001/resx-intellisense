@@ -9,8 +9,7 @@ export class ResxDiagnostics {
     this.diagnosticCollection =
       vscode.languages.createDiagnosticCollection("resx-diagnostics");
   }
-
-  // Call this whenever yhe user types or the cache updates
+  
   public refreshDiagnostics(document: vscode.TextDocument): void {
     // The only check supported files
     if (
@@ -33,19 +32,10 @@ export class ResxDiagnostics {
     let match;
     while ((match = regex.exec(text)) !== null) {
       const keyName = match[2];
-
-      // If key exists, skip it
+      
       if (this.resxService.getKeyExsists(keyName)) {
         continue;
       }
-
-      // Calculate the start and end postion of the KEY (inside the quotes)
-      // match.index is the start of the whole match.
-      // We need to add the length of Group 1 + brackets + quates to find the key's start.
-      // A simpley way is to use document.postionAt for exact indicies.
-
-      // The match[0] is the full string: Loclalizer["Key"]
-      // We want to highlight only the "Key" part.
 
       const matchStart = match.index;
       const keyStart = matchStart + match[0].indexOf(`"${keyName}"`) + 1; // +1 to skip the opening quote
@@ -61,8 +51,7 @@ export class ResxDiagnostics {
         `Key "${keyName}" not found in .resx files.`,
         vscode.DiagnosticSeverity.Warning
       );
-
-      // Add code for "Quick Fix" to link back to our CodeAction
+      
       diagnostic.code = DiagnosticCodes.MissingResxKey;
 
       diagnostics.push(diagnostic);

@@ -2,9 +2,10 @@
   "name": "inteli-resx",
   "displayName": "Inteli-Resx",
   "description": "an resx intelisense for C# and Blazor",
+  "publisher": "DzoniDev",
   "version": "0.0.1",
   "engines": {
-    "vscode": "^1.90.0"
+    "vscode": "^1.106.0"
   },
   "categories": [
     "Other"

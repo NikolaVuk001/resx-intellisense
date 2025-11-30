@@ -5,7 +5,6 @@ export function getWebviewContent(
   fileGroups: { path: string; label: string; value: string, isDisabled: boolean }[],
   hasAi: boolean
 ) {
-  // Generate an input field for every file found
   const inputsHtml = fileGroups
     .map(
       (file, index) => `
@@ -82,7 +81,7 @@ export function getWebviewContent(
 
             const vscode = acquireVsCodeApi();
 
-            // 1. Save Logic (Updated to use data-path)
+            // handle save
             document.getElementById("saveBtn").addEventListener("click", () => {
             const data = {};
             const inputs = document.querySelectorAll("input");
@@ -96,7 +95,7 @@ export function getWebviewContent(
             vscode.postMessage({ command: "save", data: data });
             });
 
-            // 2. AI Logic
+            // handle AI button
             const aiBtn  = document.getElementById("aiBtn");
             if (aiBtn) {
                 aiBtn.addEventListener('click', () => {
@@ -113,7 +112,7 @@ export function getWebviewContent(
                 });
             }
 
-            // 3. Listen for AI Results comming back
+            // handle the ai results
             window.addEventListener("message", (event) => {
             const message = event.data;
 
@@ -121,8 +120,7 @@ export function getWebviewContent(
                 const translations = message.data;
 
                 const inputs = document.querySelectorAll("input");                
-                inputs.forEach((input) => {
-                // <--- WAS WRONG HERE
+                inputs.forEach((input) => {                
                 const langCode = input.id;
                 if (translations[langCode] && input.value.trim() === "") {
                     input.value = translations[langCode];
@@ -136,19 +134,18 @@ export function getWebviewContent(
             }
             });
 
-            // 2. Auto-Focus the first input field
-            // Since we sorted the list so "Default" is frist, this puts the cursor
-            // exactly where you want it.
+            // autofocus the default input
             const firstInput = document.querySelector("input");
             if (firstInput) {
                 firstInput.focus();
             }
 
-            // Allow pressing "Enter" to save
+            // enter to save, ctrl+enter for ai
             window.addEventListener("keydown", (e) => {
             if (e.key === "Enter" && !e.ctrlKey) {
                 document.getElementById("saveBtn").click();
             }
+            
             if(e.ctrlKey && e.key === "Enter"){
                 const aiBtn = document.getElementById("aiBtn");
                 if(aiBtn){

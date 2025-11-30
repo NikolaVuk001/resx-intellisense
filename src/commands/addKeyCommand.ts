@@ -6,8 +6,11 @@ import { getWebviewContent } from "../ui/addKeyWebview";
 import { AiService } from "../services/aiService";
 import { isDataView } from "util/types";
 
+
+// Command to add or edit a key in the resx files
 export async function addKeyCommand(keyName: string) {
   if (!keyName) return;
+
 
   const config = vscode.workspace.getConfiguration("resxIntellisense");
   const targetFamilyFile = config.get<string>("defaultFile") || "Resources.resx";
@@ -32,10 +35,7 @@ export async function addKeyCommand(keyName: string) {
     }
     return;
   }
-
-  // ---------------------------------------------------------
-  // READ VALUES
-  // ---------------------------------------------------------
+  
   let fileGroups = familyFiles.map((uri) => {
     const name = path.basename(uri.fsPath);
     let label = "";
@@ -49,8 +49,7 @@ export async function addKeyCommand(keyName: string) {
 
     let currentValue = "";
     try {
-      const content = fs.readFileSync(uri.fsPath, "utf8");
-      // Use ignoreAttributes: false so we can read the @name
+      const content = fs.readFileSync(uri.fsPath, "utf8");      
       const parser = new XMLParser({ ignoreAttributes: false });
       const result = parser.parse(content);
 
@@ -70,7 +69,7 @@ export async function addKeyCommand(keyName: string) {
 
   console.log("File Groups before filtering:", fileGroups);
 
-  // If we want to exclude some languages
+  // EXPERIMENTAL: If we want to exclude some languages
   // fileGroups = fileGroups.filter(group => !excludedLangs.includes(group.label));
 
   fileGroups.sort((a, b) => {
@@ -79,13 +78,13 @@ export async function addKeyCommand(keyName: string) {
     if (isPrimary(b.label)) return 1;
     return 0;
   });
-
-
-  // Filtering 
-
+  
+  // AI SERVICE CHECK
   const aiService = new AiService();
   const hasAi = await aiService.isAiAvailable();
 
+
+  // Opening the webview panel
   const panel = vscode.window.createWebviewPanel(
     "editResxKey",
     `Edit Key: ${keyName}`,
@@ -120,7 +119,7 @@ export async function addKeyCommand(keyName: string) {
 }
 
 // ---------------------------------------------------------
-// WRITE LOGIC (UPDATED FOR EDITING)
+// WRITE LOGIC
 // ---------------------------------------------------------
 function writeToFiles(keyName: string, data: { [filePath: string]: string }) {
   for (const [filePath, value] of Object.entries(data)) {
